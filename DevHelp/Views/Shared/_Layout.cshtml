@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - DevHelp</title>
+    <script>
+        (function () {
+            var savedTheme = localStorage.getItem("devhelp-theme");
+            if (savedTheme === "light" || savedTheme === "dark") {
+                document.documentElement.setAttribute("data-bs-theme", savedTheme);
+            }
+        })();
+    </script>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/DevHelp.styles.css" asp-append-version="true" />
+</head>
+<body class="@(((ViewContext.RouteData.Values["controller"]?.ToString() == "Home") && (ViewContext.RouteData.Values["action"]?.ToString() == "PublicDashboard")) ? "tv-panel-page" : null)">
+    @using Microsoft.EntityFrameworkCore
+    @inject DevHelp.Data.ApplicationDbContext DbContext
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty;
+        var isPublicTvPage = currentController == "Home" && currentAction == "PublicDashboard";
+        var categoriesCount = 0;
+        if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+        {
+            categoriesCount = await DbContext.Categories.CountAsync();
+        }
+    }
+    @if (!isPublicTvPage)
+    {
+        <header>
+            <nav class="navbar navbar-expand-sm glass-nav @(isPublicTvPage ? "mb-2" : "mb-4")">
+                <div class="container-fluid">
+                    <a class="navbar-brand fw-semibold" asp-area="" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-lightbulb-fill text-primary me-1"></i>DevHelp
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                        <ul class="navbar-nav flex-grow-1">
+                            @if (!isPublicTvPage && User.Identity?.IsAuthenticated == true)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link @(currentController == "Home" && currentAction == "Index" ? "active" : null)" asp-area="" asp-controller="Home" asp-action="Index"><i class="bi bi-house-door me-1"></i>Home</a>
+                                </li>
+                                @if (User.IsInRole("Aluno"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link @(currentController == "Tickets" && currentAction == "Create" ? "active" : null)" asp-area="" asp-controller="Tickets" asp-action="Create"><i class="bi bi-ticket-detailed me-1"></i>Abrir chamado</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(currentController == "Tickets" && currentAction == "My" ? "active" : null)" asp-area="" asp-controller="Tickets" asp-action="My"><i class="bi bi-journal-text me-1"></i>Meus chamados</a>
+                                    </li>
+                                }
+                                @if (User.IsInRole("Professor") || User.IsInRole("Admin"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link @(currentController == "Tickets" && currentAction == "Queue" ? "active" : null)" asp-area="" asp-controller="Tickets" asp-action="Queue"><i class="bi bi-list-task me-1"></i>Fila</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(currentController == "Tickets" && currentAction == "History" ? "active" : null)" asp-area="" asp-controller="Tickets" asp-action="History"><i class="bi bi-clock-history me-1"></i>Histórico de atendimentos</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-area="" asp-controller="Tickets" asp-action="AttendNext"><i class="bi bi-megaphone me-1"></i>Iniciar atendimento</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/painel-tv" target="_blank" rel="noopener noreferrer"><i class="bi bi-tv me-1"></i>Painel TV</a>
+                                    </li>
+                                }
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link @(currentController == "Admin" && currentAction == "Users" ? "active" : null)" asp-area="" asp-controller="Admin" asp-action="Users"><i class="bi bi-people-fill me-1"></i>Usuários</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(currentController == "Admin" && currentAction == "Categories" ? "active" : null)" asp-area="" asp-controller="Admin" asp-action="Categories"><i class="bi bi-tags-fill me-1"></i>Categorias <span class="badge rounded-pill text-bg-primary ms-1">@categoriesCount</span></a>
+                                    </li>
+                                }
+                                <li class="nav-item">
+                                    <a class="nav-link @(currentController == "Home" && currentAction == "Privacy" ? "active" : null)" asp-area="" asp-controller="Home" asp-action="Privacy"><i class="bi bi-shield-check me-1"></i>Privacidade</a>
+                                </li>
+                            }
+                        </ul>
+                        <partial name="_LoginPartial" />
+                    </div>
+                </div>
+            </nav>
+        </header>
+    }
+    <div class="@(isPublicTvPage ? "container-fluid tv-main" : "container")">
+        <main role="main" class="pb-4">
+            @RenderBody()
+        </main>
+    </div>
+
+    @if (!isPublicTvPage)
+    {
+        <footer class="footer footer-clean text-muted mt-2">
+            <div class="container d-flex align-items-center justify-content-center py-1">
+                <small class="mb-0 footer-caption">&copy; 2026 - DevHelp | Fila de Atendimentos</small>
+            </div>
+        </footer>
+    }
+
+    @if (!isPublicTvPage)
+    {
+        <button type="button" id="theme-toggle" class="theme-fab" aria-label="Alternar tema" title="Alternar tema">
+            <i id="theme-toggle-icon" class="bi bi-moon-stars-fill" aria-hidden="true"></i>
+        </button>
+    }
+
+    <div class="modal fade" id="confirmActionModal" tabindex="-1" aria-labelledby="confirmActionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content clean-card border-0 shadow-modern">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title" id="confirmActionModalLabel"><i class="bi bi-question-circle text-primary me-2"></i>Confirmação</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <p class="mb-0" id="confirmActionModalMessage">Tem certeza que deseja continuar?</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Não</button>
+                    <button type="button" class="btn btn-primary" id="confirmActionModalYes">Sim</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

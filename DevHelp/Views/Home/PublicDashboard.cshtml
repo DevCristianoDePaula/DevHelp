@@ -1,0 +1,471 @@
+@model DevHelp.Models.HomeDashboardViewModel
+@using System.Text.Json
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Painel TV";
+}
+
+<section class="mt-3 mb-3">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div>
+            <h1 class="h2 mb-1"><i class="bi bi-tv text-primary me-2"></i>Dashboard de Atendimentos</h1>
+            <p class="text-secondary mb-0">Painel público para monitor de TV com atualização automática.</p>
+        </div>
+        <div class="fw-semibold fs-4 d-flex align-items-center">
+            <i class="bi bi-lightbulb-fill text-primary me-2"></i>DevHelp
+        </div>
+    </div>
+</section>
+
+<section class="row g-3">
+    <div class="col-xl-3 col-md-6">
+        <div class="card clean-card border-0 h-100 shadow-modern">
+            <div class="card-body p-3">
+                <div class="small text-secondary">SLA pendente vencido</div>
+                <div class="display-6 fw-semibold text-danger">@Model.SlaOverview.PendingOverdueCount</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card clean-card border-0 h-100 shadow-modern">
+            <div class="card-body p-3">
+                <div class="small text-secondary">Atendimentos em curso</div>
+                <div class="display-6 fw-semibold">@Model.InProgressCount</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card clean-card border-0 h-100 shadow-modern">
+            <div class="card-body p-3">
+                <div class="small text-secondary">Fila pendente</div>
+                <div class="display-6 fw-semibold">@Model.QueueCount</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card clean-card border-0 h-100 shadow-modern">
+            <div class="card-body p-3">
+                <div class="small text-secondary">Professores</div>
+                <div class="display-6 fw-semibold">@Model.ProfessorsCount</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-3"><i class="bi bi-person-badge me-2 text-primary"></i>Professores e atendimento atual</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Professor</th>
+                                <th>Ticket</th>
+                                <th>Início</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model.ProfessorsCurrentAttendance)
+                        {
+                            <tr>
+                                <td>@item.ProfessorName</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.TicketNumber) ? "-" : item.TicketNumber)</td>
+                                <td>@(item.ServiceStartedAtUtc.HasValue ? item.ServiceStartedAtUtc.Value.ToLocalTime().ToString("dd/MM HH:mm") : "-")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-3"><i class="bi bi-list-ol me-2 text-primary"></i>Próximos da fila</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ticket</th>
+                                <th>Aluno</th>
+                                <th>Prioridade</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @if (Model.NextQueue.Count == 0)
+                        {
+                            <tr><td colspan="4" class="text-secondary text-center py-3">Fila vazia.</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model.NextQueue)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@item.TicketNumber</td>
+                                    <td>@item.StudentName</td>
+                                    <td>@item.Priority</td>
+                                    <td>@item.QueueScore</td>
+                                </tr>
+                            }
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-3"><i class="bi bi-check2-square me-2 text-primary"></i>Últimos atendimentos finalizados</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Professor</th>
+                                <th>Ticket</th>
+                                <th>Fim</th>
+                                <th>Tempo total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @if (Model.LatestFinishedAttendances.Count == 0)
+                        {
+                            <tr><td colspan="4" class="text-secondary text-center py-3">Sem atendimentos finalizados.</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model.LatestFinishedAttendances)
+                            {
+                                <tr>
+                                    <td>@item.ProfessorName</td>
+                                    <td class="fw-semibold">@item.TicketNumber</td>
+                                    <td>@item.ServiceFinishedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@item.TotalServiceMinutes min</td>
+                                </tr>
+                            }
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-2"><i class="bi bi-pie-chart me-2 text-primary"></i>Distribuição por categoria</h2>
+                <canvas id="tvChartCategory" class="dashboard-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-2"><i class="bi bi-alarm me-2 text-primary"></i>Indicadores de SLA</h2>
+                <canvas id="tvChartSla" class="dashboard-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-2"><i class="bi bi-bar-chart-line me-2 text-primary"></i>Finalizações por professor</h2>
+                <canvas id="tvChartFinishedByProfessor" class="dashboard-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-2"><i class="bi bi-diagram-3 me-2 text-primary"></i>Prioridades pendentes</h2>
+                <canvas id="tvChartPriority" class="dashboard-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-8">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-2"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Aberturas x finalizações (10 dias)</h2>
+                <canvas id="tvChartFlow" class="dashboard-chart"></canvas>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="tvCallModal" tabindex="-1" aria-labelledby="tvCallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered ticket-call-modal-dialog">
+        <div class="modal-content ticket-call-modal-content">
+            <div class="modal-header border-0 pb-0 ticket-call-modal-header">
+                <h5 class="modal-title ticket-call-modal-title" id="tvCallModalLabel"><i class="bi bi-megaphone-fill text-primary me-2"></i>Próximo atendimento</h5>
+            </div>
+            <div class="modal-body pt-2 ticket-call-modal-body">
+                <p class="ticket-call-label mb-2">Ticket chamado</p>
+                <h2 class="ticket-call-number fw-bold" id="tvCallNumber">-</h2>
+                <p class="ticket-call-student mb-0">Aluno: <strong id="tvCallStudent">-</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function () {
+            const categoryData = @Html.Raw(JsonSerializer.Serialize(Model.CategoryDistribution));
+            const priorityData = @Html.Raw(JsonSerializer.Serialize(Model.PriorityDistribution));
+            const finishedByProfessorData = @Html.Raw(JsonSerializer.Serialize(Model.FinishedByProfessor));
+            const flowData = @Html.Raw(JsonSerializer.Serialize(Model.DailyFlow.Select(x => new {
+                Label = x.DayUtc.ToLocalTime().ToString("dd/MM"),
+                x.OpenedCount,
+                x.FinishedCount
+            })));
+            const slaData = @Html.Raw(JsonSerializer.Serialize(new[]
+            {
+                new { Label = "Pendente no prazo", Value = Model.SlaOverview.PendingOnTimeCount },
+                new { Label = "Pendente vencido", Value = Model.SlaOverview.PendingOverdueCount },
+                new { Label = "Finalizado no SLA", Value = Model.SlaOverview.FinishedWithinSlaCount },
+                new { Label = "Finalizado fora SLA", Value = Model.SlaOverview.FinishedOutOfSlaCount }
+            }));
+
+            const categoryCanvas = document.getElementById('tvChartCategory');
+            if (categoryCanvas && categoryData.length > 0) {
+                new Chart(categoryCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: categoryData.map(x => x.Label),
+                        datasets: [{ data: categoryData.map(x => x.Value) }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            const slaCanvas = document.getElementById('tvChartSla');
+            if (slaCanvas) {
+                new Chart(slaCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: slaData.map(x => x.Label),
+                        datasets: [{
+                            label: 'Quantidade',
+                            data: slaData.map(x => x.Value),
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            const priorityCanvas = document.getElementById('tvChartPriority');
+            if (priorityCanvas && priorityData.length > 0) {
+                new Chart(priorityCanvas, {
+                    type: 'polarArea',
+                    data: {
+                        labels: priorityData.map(x => x.Label),
+                        datasets: [{ data: priorityData.map(x => x.Value) }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top' } }
+                    }
+                });
+            }
+
+            const flowCanvas = document.getElementById('tvChartFlow');
+            if (flowCanvas) {
+                new Chart(flowCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: flowData.map(x => x.Label),
+                        datasets: [
+                            {
+                                label: 'Abertos',
+                                data: flowData.map(x => x.OpenedCount),
+                                tension: 0.35,
+                                fill: true
+                            },
+                            {
+                                label: 'Finalizados',
+                                data: flowData.map(x => x.FinishedCount),
+                                tension: 0.35,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            const finishedCanvas = document.getElementById('tvChartFinishedByProfessor');
+            if (finishedCanvas && finishedByProfessorData.length > 0) {
+                new Chart(finishedCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: finishedByProfessorData.map(x => x.Label),
+                        datasets: [{
+                            label: 'Finalizações',
+                            data: finishedByProfessorData.map(x => x.Value),
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            const modalElement = document.getElementById('tvCallModal');
+            const modal = new bootstrap.Modal(modalElement, {
+                backdrop: 'static',
+                keyboard: false
+            });
+            const numberElement = document.getElementById('tvCallNumber');
+            const studentElement = document.getElementById('tvCallStudent');
+            let callTimers = [];
+            let audioContext = null;
+
+            let lastCallId = Number(localStorage.getItem('devhelp-tv-last-call-id') || 0);
+
+            function announceWithVoice() {
+                if (!('speechSynthesis' in window)) {
+                    return;
+                }
+
+                try {
+                    const utterance = new SpeechSynthesisUtterance('Atenção. Próximo atendimento.');
+                    utterance.lang = 'pt-BR';
+                    utterance.rate = 1;
+                    utterance.pitch = 1;
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(utterance);
+                } catch {
+                }
+            }
+
+            async function playCallSound() {
+                try {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContextClass) {
+                        announceWithVoice();
+                        return;
+                    }
+
+                    if (!audioContext) {
+                        audioContext = new AudioContextClass();
+                    }
+
+                    if (audioContext.state === 'suspended') {
+                        await audioContext.resume();
+                    }
+
+                    if (audioContext.state !== 'running') {
+                        announceWithVoice();
+                        return;
+                    }
+
+                    const now = audioContext.currentTime;
+
+                    const toneA = audioContext.createOscillator();
+                    const gainA = audioContext.createGain();
+                    toneA.type = 'sine';
+                    toneA.frequency.setValueAtTime(880, now);
+                    gainA.gain.setValueAtTime(0.0001, now);
+                    gainA.gain.exponentialRampToValueAtTime(0.12, now + 0.02);
+                    gainA.gain.exponentialRampToValueAtTime(0.0001, now + 0.20);
+                    toneA.connect(gainA).connect(audioContext.destination);
+                    toneA.start(now);
+                    toneA.stop(now + 0.20);
+
+                    const toneB = audioContext.createOscillator();
+                    const gainB = audioContext.createGain();
+                    toneB.type = 'sine';
+                    toneB.frequency.setValueAtTime(1174, now + 0.22);
+                    gainB.gain.setValueAtTime(0.0001, now + 0.22);
+                    gainB.gain.exponentialRampToValueAtTime(0.12, now + 0.24);
+                    gainB.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+                    toneB.connect(gainB).connect(audioContext.destination);
+                    toneB.start(now + 0.22);
+                    toneB.stop(now + 0.45);
+                } catch {
+                    announceWithVoice();
+                }
+            }
+
+            function unlockAudio() {
+                playCallSound();
+            }
+
+            window.addEventListener('pointerdown', unlockAudio, { once: true });
+            window.addEventListener('keydown', unlockAudio, { once: true });
+
+            function clearCallTimers() {
+                for (const timer of callTimers) {
+                    clearTimeout(timer);
+                }
+
+                callTimers = [];
+            }
+
+            async function checkLatestCall() {
+                try {
+                    const response = await fetch('/painel-tv/ultima-chamada', { cache: 'no-store' });
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const data = await response.json();
+                    if (!data || !data.id) {
+                        return;
+                    }
+
+                    if (data.id > lastCallId) {
+                        lastCallId = data.id;
+                        localStorage.setItem('devhelp-tv-last-call-id', String(lastCallId));
+
+                        numberElement.textContent = data.ticketNumber || '-';
+                        studentElement.textContent = data.studentName || '-';
+                        modal.show();
+
+                        clearCallTimers();
+                        playCallSound();
+                        callTimers.push(setTimeout(playCallSound, 2000));
+                        callTimers.push(setTimeout(playCallSound, 4000));
+                        callTimers.push(setTimeout(function () {
+                            modal.hide();
+                        }, 5000));
+                    }
+                } catch {
+                }
+            }
+
+            checkLatestCall();
+            setInterval(checkLatestCall, 4000);
+            setInterval(function () {
+                window.location.reload();
+            }, 45000);
+        })();
+    </script>
+}

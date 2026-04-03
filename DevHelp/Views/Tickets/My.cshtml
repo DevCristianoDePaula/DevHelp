@@ -1,0 +1,131 @@
+@model IReadOnlyCollection<DevHelp.Models.Tickets.TicketListItemViewModel>
+@{
+    ViewData["Title"] = "Meus Chamados";
+
+    static string PriorityBadgeClass(DevHelp.Models.Tickets.TicketPriority priority)
+    {
+        return priority switch
+        {
+            DevHelp.Models.Tickets.TicketPriority.Urgent => "text-bg-danger",
+            DevHelp.Models.Tickets.TicketPriority.High => "text-bg-warning",
+            DevHelp.Models.Tickets.TicketPriority.Medium => "text-bg-info",
+            _ => "text-bg-secondary"
+        };
+    }
+
+    static string PriorityText(DevHelp.Models.Tickets.TicketPriority priority)
+    {
+        return priority switch
+        {
+            DevHelp.Models.Tickets.TicketPriority.Urgent => "Urgente",
+            DevHelp.Models.Tickets.TicketPriority.High => "Alta",
+            DevHelp.Models.Tickets.TicketPriority.Medium => "Média",
+            _ => "Baixa"
+        };
+    }
+
+    static string StatusBadgeClass(DevHelp.Models.Tickets.TicketStatus status)
+    {
+        return status switch
+        {
+            DevHelp.Models.Tickets.TicketStatus.Open => "text-bg-primary",
+            DevHelp.Models.Tickets.TicketStatus.InProgress => "text-bg-warning",
+            DevHelp.Models.Tickets.TicketStatus.Resolved => "text-bg-success",
+            DevHelp.Models.Tickets.TicketStatus.Cancelled => "text-bg-dark",
+            _ => "text-bg-secondary"
+        };
+    }
+
+    static string StatusText(DevHelp.Models.Tickets.TicketStatus status)
+    {
+        return status switch
+        {
+            DevHelp.Models.Tickets.TicketStatus.Open => "Aberto",
+            DevHelp.Models.Tickets.TicketStatus.InProgress => "Em atendimento",
+            DevHelp.Models.Tickets.TicketStatus.Resolved => "Resolvido",
+            DevHelp.Models.Tickets.TicketStatus.Cancelled => "Cancelado",
+            _ => "Fechado"
+        };
+    }
+}
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card clean-card border-0 shadow-modern">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div>
+                        <h1 class="h3 mb-1"><i class="bi bi-journal-text text-primary me-2"></i>@ViewData["Title"]</h1>
+                        <p class="text-secondary mb-0">Acompanhe os chamados já abertos pelo seu usuário.</p>
+                    </div>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Novo chamado
+                    </a>
+                </div>
+
+                @if (TempData["TicketSuccess"] is string successMessage)
+                {
+                    <div class="alert alert-success" role="alert">@successMessage</div>
+                }
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Categoria</th>
+                                <th>Prioridade</th>
+                                <th>Status</th>
+                                <th>Abertura</th>
+                                <th>Prazo SLA</th>
+                                <th>Anexos/Links</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @if (Model.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center text-secondary py-4">Nenhum chamado aberto até o momento.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var ticket in Model)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@ticket.TicketNumber</td>
+                                    <td>@ticket.CategoryName</td>
+                                    <td><span class="badge @PriorityBadgeClass(ticket.Priority)">@PriorityText(ticket.Priority)</span></td>
+                                    <td><span class="badge @StatusBadgeClass(ticket.Status)">@StatusText(ticket.Status)</span></td>
+                                    <td>@ticket.CreatedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@ticket.ResponseDueAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@ticket.AttachmentsCount</td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-2">
+                                            <a asp-action="Details" asp-route-id="@ticket.Id" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye me-1"></i>Detalhes
+                                            </a>
+                                            @if (ticket.Status is DevHelp.Models.Tickets.TicketStatus.Open or DevHelp.Models.Tickets.TicketStatus.InProgress)
+                                            {
+                                                <form asp-action="CancelTicket" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@ticket.Id" />
+                                                    <input type="hidden" name="returnTo" value="my" />
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" data-confirm-submit="true" data-confirm-message="Cancelar este chamado?">
+                                                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

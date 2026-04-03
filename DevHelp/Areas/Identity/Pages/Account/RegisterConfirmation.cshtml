@@ -1,0 +1,40 @@
+@page
+@model DevHelp.Areas.Identity.Pages.Account.RegisterConfirmationModel
+@{
+    ViewData["Title"] = "E-mail enviado";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-7 col-md-9">
+        <section class="card clean-card shadow-modern border-0">
+            <div class="card-body p-4 p-lg-5">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-envelope-check-fill text-primary fs-4"></i>
+                    <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+                </div>
+
+                <p class="text-secondary mb-3">
+                    Enviamos um link de confirmação para <strong>@Model.Email</strong>.
+                    Abra sua caixa de entrada e clique no link para ativar a conta.
+                </p>
+
+                <div class="info-chip p-3 rounded-3 mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="bi bi-info-circle-fill text-primary"></i>
+                        <strong>Importante</strong>
+                    </div>
+                    <small class="text-secondary d-block">Se não encontrar o e-mail, verifique spam/lixo eletrônico.</small>
+                </div>
+
+                <div class="d-grid gap-2 d-sm-flex">
+                    <a asp-page="./Login" class="btn btn-primary btn-lg">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Ir para login
+                    </a>
+                    <a asp-page="./ResendEmailConfirmation" asp-route-email="@Model.Email" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-arrow-repeat me-1"></i>Reenviar e-mail
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>

@@ -1,0 +1,77 @@
+@model DevHelp.Models.Tickets.TicketCreateViewModel
+@{
+    ViewData["Title"] = "Abrir Chamado";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-8 col-xl-7">
+        <section class="card clean-card shadow-modern border-0">
+            <div class="card-body p-4 p-lg-5">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-ticket-detailed-fill text-primary fs-4"></i>
+                    <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+                </div>
+                <p class="text-secondary mb-4">Informe categoria, prioridade, descrição e anexos opcionais para entrar na fila de atendimento.</p>
+
+                <form method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+                    <div class="form-floating mb-3">
+                        <select asp-for="CategoryId" class="form-select" asp-items="Model.CategoryOptions">
+                            <option value="">Selecione</option>
+                        </select>
+                        <label asp-for="CategoryId"></label>
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <select asp-for="Priority" class="form-select" asp-items="Model.PriorityOptions">
+                            <option value="">Selecione</option>
+                        </select>
+                        <label asp-for="Priority"></label>
+                        <span asp-validation-for="Priority" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <select asp-for="PreferredProfessorId" class="form-select" asp-items="Model.ProfessorOptions">
+                            <option value="">Sem preferência</option>
+                        </select>
+                        <label asp-for="PreferredProfessorId"></label>
+                        <span asp-validation-for="PreferredProfessorId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <textarea asp-for="Description" class="form-control" placeholder="Descreva o problema" style="height: 170px"></textarea>
+                        <label asp-for="Description"></label>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Files" class="form-label"></label>
+                        <input asp-for="Files" class="form-control" type="file" multiple />
+                        <span asp-validation-for="Files" class="text-danger"></span>
+                        <div class="form-text">Se necessário, anexe prints, logs ou documentos.</div>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <textarea asp-for="Links" class="form-control" placeholder="https://..." style="height: 120px"></textarea>
+                        <label asp-for="Links"></label>
+                        <span asp-validation-for="Links" class="text-danger"></span>
+                        <div class="form-text">Opcional: informe um link por linha.</div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check2-circle me-1"></i>Abrir chamado
+                        </button>
+                        <a asp-action="My" class="btn btn-outline-secondary btn-lg">Meus chamados</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

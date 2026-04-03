@@ -1,0 +1,176 @@
+@model IReadOnlyCollection<DevHelp.Models.Tickets.TicketQueueItemViewModel>
+@{
+    ViewData["Title"] = "Fila de Atendimento";
+
+    static string PriorityBadgeClass(DevHelp.Models.Tickets.TicketPriority priority)
+    {
+        return priority switch
+        {
+            DevHelp.Models.Tickets.TicketPriority.Urgent => "text-bg-danger",
+            DevHelp.Models.Tickets.TicketPriority.High => "text-bg-warning",
+            DevHelp.Models.Tickets.TicketPriority.Medium => "text-bg-info",
+            _ => "text-bg-secondary"
+        };
+    }
+
+    static string PriorityText(DevHelp.Models.Tickets.TicketPriority priority)
+    {
+        return priority switch
+        {
+            DevHelp.Models.Tickets.TicketPriority.Urgent => "Urgente",
+            DevHelp.Models.Tickets.TicketPriority.High => "Alta",
+            DevHelp.Models.Tickets.TicketPriority.Medium => "Média",
+            _ => "Baixa"
+        };
+    }
+
+    static string StatusBadgeClass(DevHelp.Models.Tickets.TicketStatus status)
+    {
+        return status switch
+        {
+            DevHelp.Models.Tickets.TicketStatus.Open => "text-bg-primary",
+            DevHelp.Models.Tickets.TicketStatus.InProgress => "text-bg-warning",
+            DevHelp.Models.Tickets.TicketStatus.Resolved => "text-bg-success",
+            DevHelp.Models.Tickets.TicketStatus.Cancelled => "text-bg-dark",
+            _ => "text-bg-secondary"
+        };
+    }
+
+    static string StatusText(DevHelp.Models.Tickets.TicketStatus status)
+    {
+        return status switch
+        {
+            DevHelp.Models.Tickets.TicketStatus.Open => "Aberto",
+            DevHelp.Models.Tickets.TicketStatus.InProgress => "Em atendimento",
+            DevHelp.Models.Tickets.TicketStatus.Resolved => "Resolvido",
+            DevHelp.Models.Tickets.TicketStatus.Cancelled => "Cancelado",
+            _ => "Fechado"
+        };
+    }
+}
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card clean-card border-0 shadow-modern">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-list-task text-primary fs-4"></i>
+                    <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+                </div>
+                <p class="text-secondary mb-3">Ordenação por prioridade + tempo de espera (score maior sobe na fila).</p>
+
+                @if (TempData["TicketSuccess"] is string successMessage)
+                {
+                    <div class="alert alert-success" role="alert">@successMessage</div>
+                }
+
+                @if (TempData["TicketError"] is string errorMessage)
+                {
+                    <div class="alert alert-danger" role="alert">@errorMessage</div>
+                }
+
+                <div class="alert alert-warning py-2" role="alert">
+                    <i class="bi bi-exclamation-triangle me-1"></i>Chamados com SLA vencido aparecem marcados com atraso em vermelho.
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Aluno</th>
+                                <th>Categoria</th>
+                                <th>Prioridade</th>
+                                <th>Status</th>
+                                <th>Abertura</th>
+                                <th>Prazo SLA</th>
+                                <th>Atraso</th>
+                                <th>Score</th>
+                                <th>Preferência</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @if (Model.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="11" class="text-center text-secondary py-4">Sem chamados na fila.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var ticket in Model)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@ticket.TicketNumber</td>
+                                    <td>@ticket.StudentName</td>
+                                    <td>@ticket.CategoryName</td>
+                                    <td><span class="badge @PriorityBadgeClass(ticket.Priority)">@PriorityText(ticket.Priority)</span></td>
+                                    <td><span class="badge @StatusBadgeClass(ticket.Status)">@StatusText(ticket.Status)</span></td>
+                                    <td>@ticket.CreatedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@ticket.ResponseDueAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        @if (ticket.IsOverdue)
+                                        {
+                                            <span class="badge text-bg-danger">@ticket.OverdueMinutes min</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-secondary">No prazo</span>
+                                        }
+                                    </td>
+                                    <td>@ticket.QueueScore</td>
+                                    <td>
+                                        @if (string.IsNullOrWhiteSpace(ticket.PreferredProfessorName))
+                                        {
+                                            <span class="text-secondary">Livre</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-info">@ticket.PreferredProfessorName</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-2">
+                                            <form asp-action="AttendNow" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@ticket.Id" />
+                                                @if (ticket.IsReservedForAnotherProfessor)
+                                                {
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm" disabled title="Reservado para outro professor">
+                                                        <i class="bi bi-lock me-1"></i>Reservado
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="submit" class="btn btn-primary btn-sm">
+                                                        <i class="bi bi-play-circle me-1"></i>Atender agora
+                                                    </button>
+                                                }
+                                            </form>
+                                            <a asp-action="Details" asp-route-id="@ticket.Id" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye me-1"></i>Detalhes
+                                            </a>
+                                            @if (ticket.Status is DevHelp.Models.Tickets.TicketStatus.Open or DevHelp.Models.Tickets.TicketStatus.InProgress)
+                                            {
+                                                <form asp-action="CancelTicket" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@ticket.Id" />
+                                                    <input type="hidden" name="returnTo" value="queue" />
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" data-confirm-submit="true" data-confirm-message="Cancelar este chamado?">
+                                                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

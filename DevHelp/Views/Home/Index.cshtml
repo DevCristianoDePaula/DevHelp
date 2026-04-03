@@ -1,0 +1,398 @@
+﻿@model DevHelp.Models.HomeDashboardViewModel
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<section class="mt-3 mb-3">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div>
+            <h1 class="h2 mb-1"><i class="bi bi-speedometer2 text-primary me-2"></i>Dashboard de Atendimentos</h1>
+            <p class="text-secondary mb-0">Cards personalizáveis por drag and drop com visão operacional e analítica.</p>
+        </div>
+        @if (!User.IsInRole("Aluno"))
+        {
+            <a asp-controller="Tickets" asp-action="AttendNext" class="btn btn-primary">
+                <i class="bi bi-play-circle me-1"></i>Iniciar próximo atendimento
+            </a>
+        }
+    </div>
+</section>
+
+<section class="row g-3" id="dashboard-board">
+    <div class="col-xl-3 col-md-6 dashboard-card" data-card-key="metric-professors" draggable="true">
+        <div class="card clean-card border-0 h-100 shadow-modern">
+            <div class="card-body p-3">
+                <div class="small text-secondary">Professores</div>
+                <div class="display-6 fw-semibold">@Model.ProfessorsCount</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 dashboard-card" data-card-key="metric-progress" draggable="true">
+        <div class="card clean-card border-0 h-100 shadow-modern">
+            <div class="card-body p-3">
+                <div class="small text-secondary">Atendimentos em curso</div>
+                <div class="display-6 fw-semibold">@Model.InProgressCount</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 dashboard-card" data-card-key="metric-queue" draggable="true">
+        <div class="card clean-card border-0 h-100 shadow-modern">
+            <div class="card-body p-3">
+                <div class="small text-secondary">Fila pendente</div>
+                <div class="display-6 fw-semibold">@Model.QueueCount</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 dashboard-card" data-card-key="metric-sla" draggable="true">
+        <div class="card clean-card border-0 h-100 shadow-modern">
+            <div class="card-body p-3">
+                <div class="small text-secondary">SLA pendente vencido</div>
+                <div class="display-6 fw-semibold text-danger">@Model.SlaOverview.PendingOverdueCount</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6 dashboard-card" data-card-key="professors-current" draggable="true">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-3"><i class="bi bi-person-badge me-2 text-primary"></i>Professores e atendimento atual</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Professor</th>
+                                <th>Ticket</th>
+                                <th>Início</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model.ProfessorsCurrentAttendance)
+                        {
+                            <tr>
+                                <td>@item.ProfessorName</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.TicketNumber) ? "-" : item.TicketNumber)</td>
+                                <td>@(item.ServiceStartedAtUtc.HasValue ? item.ServiceStartedAtUtc.Value.ToLocalTime().ToString("dd/MM HH:mm") : "-")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6 dashboard-card" data-card-key="queue-next" draggable="true">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-3"><i class="bi bi-list-ol me-2 text-primary"></i>Próximos da fila</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ticket</th>
+                                <th>Aluno</th>
+                                <th>Prioridade</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @if (Model.NextQueue.Count == 0)
+                        {
+                            <tr><td colspan="4" class="text-secondary text-center py-3">Fila vazia.</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model.NextQueue)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@item.TicketNumber</td>
+                                    <td>@item.StudentName</td>
+                                    <td>@item.Priority</td>
+                                    <td>@item.QueueScore</td>
+                                </tr>
+                            }
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 dashboard-card" data-card-key="chart-category" draggable="true">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-2"><i class="bi bi-pie-chart me-2 text-primary"></i>Distribuição por categoria</h2>
+                <canvas id="chartCategory" class="dashboard-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 dashboard-card" data-card-key="chart-priority" draggable="true">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-2"><i class="bi bi-diagram-3 me-2 text-primary"></i>Prioridades pendentes</h2>
+                <canvas id="chartPriority" class="dashboard-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 dashboard-card" data-card-key="chart-sla" draggable="true">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-2"><i class="bi bi-alarm me-2 text-primary"></i>Indicadores de SLA</h2>
+                <canvas id="chartSla" class="dashboard-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-8 dashboard-card" data-card-key="chart-flow" draggable="true">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-2"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Aberturas x finalizações (10 dias)</h2>
+                <canvas id="chartFlow" class="dashboard-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 dashboard-card" data-card-key="chart-finished-prof" draggable="true">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-2"><i class="bi bi-bar-chart-line me-2 text-primary"></i>Finalizações por professor</h2>
+                <canvas id="chartFinishedByProfessor" class="dashboard-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 dashboard-card" data-card-key="finished-table" draggable="true">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-3">
+                <h2 class="h5 mb-3"><i class="bi bi-check2-square me-2 text-primary"></i>Últimos atendimentos finalizados</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Professor</th>
+                                <th>Ticket</th>
+                                <th>Fim</th>
+                                <th>Tempo total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @if (Model.LatestFinishedAttendances.Count == 0)
+                        {
+                            <tr><td colspan="4" class="text-secondary text-center py-3">Sem atendimentos finalizados.</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model.LatestFinishedAttendances)
+                            {
+                                <tr>
+                                    <td>@item.ProfessorName</td>
+                                    <td class="fw-semibold">@item.TicketNumber</td>
+                                    <td>@item.ServiceFinishedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@item.TotalServiceMinutes min</td>
+                                </tr>
+                            }
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function () {
+            const board = document.getElementById('dashboard-board');
+            if (!board) {
+                return;
+            }
+
+            const storageKey = 'devhelp-dashboard-order';
+            let draggedCard = null;
+
+            function saveOrder() {
+                const order = Array.from(board.querySelectorAll('.dashboard-card'))
+                    .map(card => card.getAttribute('data-card-key'));
+                localStorage.setItem(storageKey, JSON.stringify(order));
+            }
+
+            function applySavedOrder() {
+                const saved = localStorage.getItem(storageKey);
+                if (!saved) {
+                    return;
+                }
+
+                try {
+                    const order = JSON.parse(saved);
+                    if (!Array.isArray(order)) {
+                        return;
+                    }
+
+                    for (const key of order) {
+                        const card = board.querySelector(`.dashboard-card[data-card-key="${key}"]`);
+                        if (card) {
+                            board.appendChild(card);
+                        }
+                    }
+                } catch {
+                }
+            }
+
+            function attachDnD(card) {
+                card.addEventListener('dragstart', function () {
+                    draggedCard = card;
+                    card.classList.add('dashboard-card-dragging');
+                });
+
+                card.addEventListener('dragend', function () {
+                    card.classList.remove('dashboard-card-dragging');
+                    draggedCard = null;
+                    saveOrder();
+                });
+
+                card.addEventListener('dragover', function (event) {
+                    event.preventDefault();
+                });
+
+                card.addEventListener('drop', function (event) {
+                    event.preventDefault();
+                    if (!draggedCard || draggedCard === card) {
+                        return;
+                    }
+
+                    const cards = Array.from(board.querySelectorAll('.dashboard-card'));
+                    const draggedIndex = cards.indexOf(draggedCard);
+                    const targetIndex = cards.indexOf(card);
+
+                    if (draggedIndex < targetIndex) {
+                        board.insertBefore(draggedCard, card.nextSibling);
+                    } else {
+                        board.insertBefore(draggedCard, card);
+                    }
+                });
+            }
+
+            applySavedOrder();
+            board.querySelectorAll('.dashboard-card').forEach(attachDnD);
+
+            const categoryData = @Html.Raw(JsonSerializer.Serialize(Model.CategoryDistribution));
+            const priorityData = @Html.Raw(JsonSerializer.Serialize(Model.PriorityDistribution));
+            const finishedByProfessorData = @Html.Raw(JsonSerializer.Serialize(Model.FinishedByProfessor));
+            const flowData = @Html.Raw(JsonSerializer.Serialize(Model.DailyFlow.Select(x => new {
+                Label = x.DayUtc.ToLocalTime().ToString("dd/MM"),
+                x.OpenedCount,
+                x.FinishedCount
+            })));
+            const slaData = @Html.Raw(JsonSerializer.Serialize(new[]
+            {
+                new { Label = "Pendente no prazo", Value = Model.SlaOverview.PendingOnTimeCount },
+                new { Label = "Pendente vencido", Value = Model.SlaOverview.PendingOverdueCount },
+                new { Label = "Finalizado no SLA", Value = Model.SlaOverview.FinishedWithinSlaCount },
+                new { Label = "Finalizado fora SLA", Value = Model.SlaOverview.FinishedOutOfSlaCount }
+            }));
+
+            function initCharts() {
+                const categoryCanvas = document.getElementById('chartCategory');
+                if (categoryCanvas && categoryData.length > 0) {
+                    new Chart(categoryCanvas, {
+                        type: 'doughnut',
+                        data: {
+                            labels: categoryData.map(x => x.Label),
+                            datasets: [{ data: categoryData.map(x => x.Value) }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                }
+
+                const priorityCanvas = document.getElementById('chartPriority');
+                if (priorityCanvas && priorityData.length > 0) {
+                    new Chart(priorityCanvas, {
+                        type: 'polarArea',
+                        data: {
+                            labels: priorityData.map(x => x.Label),
+                            datasets: [{ data: priorityData.map(x => x.Value) }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                }
+
+                const slaCanvas = document.getElementById('chartSla');
+                if (slaCanvas) {
+                    new Chart(slaCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: slaData.map(x => x.Label),
+                            datasets: [{
+                                label: 'Quantidade',
+                                data: slaData.map(x => x.Value),
+                                borderRadius: 8
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+                const flowCanvas = document.getElementById('chartFlow');
+                if (flowCanvas) {
+                    new Chart(flowCanvas, {
+                        type: 'line',
+                        data: {
+                            labels: flowData.map(x => x.Label),
+                            datasets: [
+                                {
+                                    label: 'Abertos',
+                                    data: flowData.map(x => x.OpenedCount),
+                                    tension: 0.35,
+                                    fill: true
+                                },
+                                {
+                                    label: 'Finalizados',
+                                    data: flowData.map(x => x.FinishedCount),
+                                    tension: 0.35,
+                                    fill: true
+                                }
+                            ]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                }
+
+                const finishedCanvas = document.getElementById('chartFinishedByProfessor');
+                if (finishedCanvas && finishedByProfessorData.length > 0) {
+                    new Chart(finishedCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: finishedByProfessorData.map(x => x.Label),
+                            datasets: [{
+                                label: 'Finalizações',
+                                data: finishedByProfessorData.map(x => x.Value),
+                                borderRadius: 8
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+            }
+
+            initCharts();
+        })();
+    </script>
+}

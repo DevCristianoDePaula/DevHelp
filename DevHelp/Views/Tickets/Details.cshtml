@@ -1,0 +1,213 @@
+@model DevHelp.Models.Tickets.TicketDetailsViewModel
+@{
+    ViewData["Title"] = $"Chamado {Model.TicketNumber}";
+
+    static string PriorityBadgeClass(DevHelp.Models.Tickets.TicketPriority priority)
+    {
+        return priority switch
+        {
+            DevHelp.Models.Tickets.TicketPriority.Urgent => "text-bg-danger",
+            DevHelp.Models.Tickets.TicketPriority.High => "text-bg-warning",
+            DevHelp.Models.Tickets.TicketPriority.Medium => "text-bg-info",
+            _ => "text-bg-secondary"
+        };
+    }
+
+    static string PriorityText(DevHelp.Models.Tickets.TicketPriority priority)
+    {
+        return priority switch
+        {
+            DevHelp.Models.Tickets.TicketPriority.Urgent => "Urgente",
+            DevHelp.Models.Tickets.TicketPriority.High => "Alta",
+            DevHelp.Models.Tickets.TicketPriority.Medium => "Média",
+            _ => "Baixa"
+        };
+    }
+
+    static string StatusBadgeClass(DevHelp.Models.Tickets.TicketStatus status)
+    {
+        return status switch
+        {
+            DevHelp.Models.Tickets.TicketStatus.Open => "text-bg-primary",
+            DevHelp.Models.Tickets.TicketStatus.InProgress => "text-bg-warning",
+            DevHelp.Models.Tickets.TicketStatus.Resolved => "text-bg-success",
+            DevHelp.Models.Tickets.TicketStatus.Cancelled => "text-bg-dark",
+            _ => "text-bg-secondary"
+        };
+    }
+
+    static string StatusText(DevHelp.Models.Tickets.TicketStatus status)
+    {
+        return status switch
+        {
+            DevHelp.Models.Tickets.TicketStatus.Open => "Aberto",
+            DevHelp.Models.Tickets.TicketStatus.InProgress => "Em atendimento",
+            DevHelp.Models.Tickets.TicketStatus.Resolved => "Resolvido",
+            DevHelp.Models.Tickets.TicketStatus.Cancelled => "Cancelado",
+            _ => "Fechado"
+        };
+    }
+}
+
+<div class="row mt-4 g-4">
+    <div class="col-lg-8">
+        <div class="card clean-card border-0 shadow-modern h-100">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                    <h1 class="h3 mb-0"><i class="bi bi-ticket-detailed text-primary me-2"></i>@ViewData["Title"]</h1>
+                    <div class="d-flex gap-2">
+                        <span class="badge @PriorityBadgeClass(Model.Priority)">@PriorityText(Model.Priority)</span>
+                        <span class="badge @StatusBadgeClass(Model.Status)">@StatusText(Model.Status)</span>
+                    </div>
+                </div>
+
+                @if (TempData["TicketSuccess"] is string successMessage)
+                {
+                    <div class="alert alert-success" role="alert">@successMessage</div>
+                }
+
+                @if (TempData["TicketError"] is string errorMessage)
+                {
+                    <div class="alert alert-danger" role="alert">@errorMessage</div>
+                }
+
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Aluno</dt>
+                    <dd class="col-sm-8">@Model.StudentName</dd>
+
+                    <dt class="col-sm-4">Professor preferencial</dt>
+                    <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.PreferredProfessorName) ? "Sem preferência" : Model.PreferredProfessorName)</dd>
+
+                    <dt class="col-sm-4">Categoria</dt>
+                    <dd class="col-sm-8">@Model.CategoryName</dd>
+
+                    <dt class="col-sm-4">Abertura</dt>
+                    <dd class="col-sm-8">@Model.CreatedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+
+                    <dt class="col-sm-4">Prazo SLA</dt>
+                    <dd class="col-sm-8">@Model.ResponseDueAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+                </dl>
+
+                @if (Model.IsOverdue)
+                {
+                    <div class="alert alert-danger mt-3 mb-0" role="alert">
+                        <i class="bi bi-alarm me-1"></i>SLA vencido há @Model.OverdueMinutes minuto(s).
+                    </div>
+                }
+
+                <hr />
+
+                <h2 class="h5">Descrição</h2>
+                <p class="text-secondary mb-0" style="white-space: pre-line;">@Model.Description</p>
+
+                @if (Model.CanChangeStatus)
+                {
+                    <hr />
+                    <form asp-action="UpdateStatus" method="post" class="row g-2 align-items-end">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <div class="col-md-6 col-lg-4">
+                            <label for="status" class="form-label">Alterar status</label>
+                            <select id="status" name="status" class="form-select">
+                                <option value="Open" selected="@(Model.Status == DevHelp.Models.Tickets.TicketStatus.Open)">Aberto</option>
+                                <option value="InProgress" selected="@(Model.Status == DevHelp.Models.Tickets.TicketStatus.InProgress)">Em atendimento</option>
+                                <option value="Resolved" selected="@(Model.Status == DevHelp.Models.Tickets.TicketStatus.Resolved)">Resolvido</option>
+                                <option value="Closed" selected="@(Model.Status == DevHelp.Models.Tickets.TicketStatus.Closed)">Fechado</option>
+                                <option value="Cancelled" selected="@(Model.Status == DevHelp.Models.Tickets.TicketStatus.Cancelled)">Cancelado</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="bi bi-check2-circle me-1"></i>Atualizar
+                            </button>
+                        </div>
+                    </form>
+
+                    @if (Model.Status != DevHelp.Models.Tickets.TicketStatus.Closed)
+                    {
+                        <form asp-action="ReturnToQueue" method="post" class="mt-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-outline-warning" data-confirm-submit="true" data-confirm-message="Devolver este ticket para a fila de atendimento?">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>Devolver para fila
+                            </button>
+                        </form>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card clean-card border-0 shadow-modern mb-4">
+            <div class="card-body p-4">
+                <h2 class="h5 mb-3"><i class="bi bi-paperclip me-2"></i>Anexos e links</h2>
+                @if (Model.Attachments.Count == 0)
+                {
+                    <p class="text-secondary mb-0">Nenhum anexo/ link informado.</p>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var item in Model.Attachments)
+                        {
+                            <li class="list-group-item px-0">
+                                @if (!string.IsNullOrWhiteSpace(item.ExternalUrl))
+                                {
+                                    <a href="@item.ExternalUrl" target="_blank" rel="noopener noreferrer">
+                                        <i class="bi bi-link-45deg me-1"></i>@item.ExternalUrl
+                                    </a>
+                                }
+                                else if (!string.IsNullOrWhiteSpace(item.RelativePath))
+                                {
+                                    <a href="@item.RelativePath" target="_blank" rel="noopener noreferrer">
+                                        <i class="bi bi-file-earmark-arrow-down me-1"></i>@(item.OriginalFileName ?? "Arquivo")
+                                    </a>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+
+        <div class="card clean-card border-0 shadow-modern">
+            <div class="card-body p-4">
+                <h2 class="h5 mb-3"><i class="bi bi-chat-left-text me-2"></i>Comentários</h2>
+
+                <form asp-action="AddComment" method="post" class="mb-3">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="mb-2">
+                        <textarea asp-for="CommentInput.Message" class="form-control" rows="3" placeholder="Escreva uma atualização..."></textarea>
+                        <span asp-validation-for="CommentInput.Message" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-send me-1"></i>Comentar
+                    </button>
+                </form>
+
+                @if (Model.Comments.Count == 0)
+                {
+                    <p class="text-secondary mb-0">Sem comentários até o momento.</p>
+                }
+                else
+                {
+                    <div class="d-grid gap-2">
+                        @foreach (var comment in Model.Comments)
+                        {
+                            <article class="border rounded p-2">
+                                <div class="small text-secondary mb-1">@comment.AuthorName · @comment.CreatedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</div>
+                                <div style="white-space: pre-line;">@comment.Message</div>
+                            </article>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
