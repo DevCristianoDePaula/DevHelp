@@ -19,6 +19,7 @@
 - No painel TV, manter margem lateral equivalente a `mx-5` para dar respiro visual nas laterais.
 - Ao usar 'Iniciar atendimento' (próximo da fila), devem ser considerados apenas chamados com status Aberto, nunca chamados já Em atendimento.
 - Confirmações de ação devem usar modal padrão com opções Sim/Não no layout, evitando caixas nativas de navegador (`confirm`/`alert`) para manter consistência visual.
+- No rodapé do DevHelp, usar a assinatura '© 2026 - DevHelp | Feito com 🖤 por Prof. Cristiano de Paula' com link no nome para o GitHub do autor.
 
 ## Theme
 - A alternância dark/light deve usar botão flutuante moderno com ícone sol/lua no canto inferior direito (não no menu), e o tema deve persistir entre views/actions, mudando somente por clique do usuário. Os itens Home/Privacidade do menu devem ficar ocultos para usuários não autenticados.

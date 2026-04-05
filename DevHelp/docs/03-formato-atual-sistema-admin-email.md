@@ -5,6 +5,9 @@ O DevHelp está estruturado com autenticação baseada em ASP.NET Identity, perf
 - O repositório inclui `README.md` principal com foco pedagógico (uso em sala de aula) e seção de galeria de telas para apresentação no GitHub.
 - A seção de galeria no `README.md` foi atualizada com comparativo das principais telas em modo `Light` e `Dark`.
 
+## Link do sistema publicado
+- URL de acesso: `https://devhelp.somee.com`
+
 ## Stack e arquitetura de interface
 - Projeto ASP.NET Core com suporte a Controllers + Razor Pages.
 - Fluxos de autenticação e conta via páginas de `Areas/Identity/Pages`.

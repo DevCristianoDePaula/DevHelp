@@ -31,6 +31,10 @@ A proposta é ensinar não só código, mas também:
 
 Centralizar e organizar chamados de alunos para atendimento por professores/admin, com prioridade por urgência + tempo de espera, rastreabilidade de atendimento e interface de operação em tempo real.
 
+## 🌐 Acesso ao sistema (ambiente publicado)
+
+- `https://devhelp.somee.com`
+
 ---
 
 ## 🧩 Principais funcionalidades
