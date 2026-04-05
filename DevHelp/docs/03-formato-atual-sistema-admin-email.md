@@ -2,11 +2,14 @@
 
 ## Visão geral atual
 O DevHelp está estruturado com autenticação baseada em ASP.NET Identity, perfil complementar obrigatório e painel administrativo para gestão de usuários.
+- O repositório inclui `README.md` principal com foco pedagógico (uso em sala de aula) e seção de galeria de telas para apresentação no GitHub.
+- A seção de galeria no `README.md` foi atualizada com comparativo das principais telas em modo `Light` e `Dark`.
 
 ## Stack e arquitetura de interface
 - Projeto ASP.NET Core com suporte a Controllers + Razor Pages.
 - Fluxos de autenticação e conta via páginas de `Areas/Identity/Pages`.
 - Layout visual moderno com Bootstrap 5.3 + Bootstrap Icons.
+- Identidade visual da marca usando ícone voltado a desenvolvimento e mentoria (substituindo a lâmpada anterior).
 - Design orientado a cards, espaçamentos limpos e efeitos sutis.
 - Alternância de tema via botão flutuante com ícone (sol/lua) no canto inferior direito.
 - Rodapé clean com visual alinhado ao tema da aplicação.
@@ -157,6 +160,14 @@ O sistema usa implementação real de `IEmailSender<ApplicationUser>` com MailKi
 ## Redefinição de senha (interface)
 - `Account/ResetPassword` foi customizada no padrão visual moderno do projeto.
 - `Account/ResetPasswordConfirmation` também segue o padrão de card e ação para login.
+
+## Privacidade (interface)
+- `Home/Privacy` foi reformulada para o padrão visual moderno do projeto.
+- A tela usa card principal com seções objetivas sobre:
+  - dados coletados;
+  - finalidade de uso;
+  - proteção dos dados;
+  - canal de contato acadêmico.
 
 ## Chamados do aluno (abertura e fila)
 - Implementado fluxo de abertura em `Tickets/Create` exclusivo para `Aluno`.

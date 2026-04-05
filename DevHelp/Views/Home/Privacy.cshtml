@@ -1,6 +1,73 @@
 ﻿@{
     ViewData["Title"] = "Privacidade";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use esta página para descrever a política de privacidade do sistema.</p>
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-xl-10">
+        <section class="card clean-card shadow-modern border-0 mb-3">
+            <div class="card-body p-4 p-lg-5">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-shield-lock-fill text-primary fs-4"></i>
+                    <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+                </div>
+
+                <p class="text-secondary mb-3">
+                    O DevHelp foi desenvolvido para uso educacional, com foco em gestão de chamados e acompanhamento de atendimentos em ambiente escolar.
+                    Esta página resume como os dados são utilizados no sistema.
+                </p>
+
+                <div class="info-chip rounded-3 p-3 mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="bi bi-info-circle-fill text-primary"></i>
+                        <strong>Resumo rápido</strong>
+                    </div>
+                    <small class="text-secondary d-block">Coletamos somente os dados necessários para autenticação, operação da fila e histórico de atendimentos.</small>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 h-100">
+                            <h2 class="h6 mb-2"><i class="bi bi-person-vcard me-1 text-primary"></i>Dados coletados</h2>
+                            <ul class="mb-0 text-secondary">
+                                <li>Nome, e-mail institucional e perfil de acesso.</li>
+                                <li>Informações de chamados, comentários e anexos enviados.</li>
+                                <li>Registros de atendimento (início, fim e docente responsável).</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 h-100">
+                            <h2 class="h6 mb-2"><i class="bi bi-gear-wide-connected me-1 text-primary"></i>Finalidade de uso</h2>
+                            <ul class="mb-0 text-secondary">
+                                <li>Permitir autenticação e controle de permissões por papel.</li>
+                                <li>Organizar fila de atendimento e priorização por SLA.</li>
+                                <li>Manter histórico acadêmico-operacional para análise e mentoria.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 h-100">
+                            <h2 class="h6 mb-2"><i class="bi bi-lock-fill me-1 text-primary"></i>Proteção dos dados</h2>
+                            <ul class="mb-0 text-secondary">
+                                <li>Controle de acesso por autenticação e autorização.</li>
+                                <li>Ações sensíveis com confirmação e rastreabilidade de operação.</li>
+                                <li>Acesso restrito a funcionalidades administrativas por papel.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 h-100">
+                            <h2 class="h6 mb-2"><i class="bi bi-envelope-paper-fill me-1 text-primary"></i>Contato</h2>
+                            <p class="text-secondary mb-0">
+                                Para dúvidas sobre tratamento de dados no contexto do projeto, procure o professor responsável ou a coordenação do laboratório.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>

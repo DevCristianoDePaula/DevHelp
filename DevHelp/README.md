@@ -130,6 +130,22 @@ Arquivo central de estado atual:
 
 ---
 
+## 🖼️ Telas do sistema (para portfólio no GitHub)
+
+Os prints abaixo mostram as principais telas em **modo Light** e **modo Dark**, facilitando a visualização da consistência visual do projeto.
+
+| Tela | Light | Dark |
+|---|---|---|
+| **Painel operacional (Dashboard)** | ![Painel operacional - Light](docs/assets/screenshots/painel-operacional.png) | ![Painel operacional - Dark](docs/assets/screenshots/painel-operacional-dark.png) |
+| **Fila de atendimento** | ![Fila de atendimento - Light](docs/assets/screenshots/fila-atendimento.png) | ![Fila de atendimento - Dark](docs/assets/screenshots/fila-atendimento-dark.png) |
+| **Histórico de atendimentos** | ![Histórico de atendimentos - Light](docs/assets/screenshots/historico.png) | ![Histórico de atendimentos - Dark](docs/assets/screenshots/historico-dark.png) |
+| **Abertura de chamado (Aluno)** | ![Abertura de chamado - Light](docs/assets/screenshots/abertura.png) | ![Abertura de chamado - Dark](docs/assets/screenshots/abertura-dark.png) |
+| **Meus chamados** | ![Meus chamados - Light](docs/assets/screenshots/meus-chamados.png) | ![Meus chamados - Dark](docs/assets/screenshots/meus-chamados-dark.png) |
+| **Atendimento / Detalhes do ticket** | ![Atendimento - Light](docs/assets/screenshots/atendimento.png) | ![Atendimento - Dark](docs/assets/screenshots/atendimento-dark.png) |
+| **Painel TV** | ![Painel TV - Light](docs/assets/screenshots/painel-tv.png) | ![Painel TV - Dark](docs/assets/screenshots/painel-tv-dark.png) |
+
+---
+
 ## 👨‍🏫 Sobre o uso em sala de aula
 
 Este projeto foi conduzido como laboratório de desenvolvimento real, em que cada melhoria foi discutida, implementada e validada com os alunos, até chegar em uma versão robusta e orientada ao uso prático.

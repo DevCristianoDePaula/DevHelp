@@ -4,6 +4,7 @@
 - Prefere documentação dos processos em arquivos Markdown e código comentado de forma detalhada, idealmente linha a linha.
 - Mantenha documentação contínua do estado atual do sistema DevHelp em arquivos Markdown e contextualize-se sempre por esse formato antes de continuar mudanças.
 - Continue com ajustes iterativos no projeto, mantendo a evolução contínua e incremental das funcionalidades já implementadas no DevHelp.
+- No DevHelp, preferir identidade visual com ícone/logo que remeta a desenvolvimento de sistemas e mentoria, em vez de lâmpada.
 
 ## Project-Specific Rules
 - Retome o desenvolvimento do DevHelp mantendo as preferências já definidas: dashboard inicial moderno com todos os cards em drag and drop, gráficos de categoria/prioridade/SLA/volumes, e evolução contínua do fluxo de tickets com documentação em Markdown atualizada a cada etapa aprovada.
