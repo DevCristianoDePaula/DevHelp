@@ -1,4 +1,4 @@
-# DevHelp
+# 🧑‍💻 DevHelp
 
 Plataforma educacional de **gestão de chamados e atendimento técnico** desenvolvida em sala de aula, com evolução incremental desde a concepção até uma solução funcional completa.
 
