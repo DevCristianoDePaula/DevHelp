@@ -143,7 +143,7 @@ Os prints abaixo mostram as principais telas em **modo Light** e **modo Dark**, 
 | **Painel operacional (Dashboard)** | ![Painel operacional - Light](DevHelp/docs/assets/screenshots/painel-operacional.png) | ![Painel operacional - Dark](DevHelp/docs/assets/screenshots/painel-operacional-dark.png) |
 | **Fila de atendimento** | ![Fila de atendimento - Light](DevHelp/docs/assets/screenshots/fila-atendimento.png) | ![Fila de atendimento - Dark](DevHelp/docs/assets/screenshots/fila-atendimento-dark.png) |
 | **Histórico de atendimentos** | ![Histórico de atendimentos - Light](DevHelp/docs/assets/screenshots/historico.png) | ![Histórico de atendimentos - Dark](DevHelp/docs/assets/screenshots/historico-dark.png) |
-| **Abertura de chamado (Aluno)** | ![Abertura de chamado - Light](DevHelp/ocs/assets/screenshots/abertura.png) | ![Abertura de chamado - Dark](DevHelp/docs/assets/screenshots/abertura-dark.png) |
+| **Abertura de chamado (Aluno)** | ![Abertura de chamado - Light](DevHelp/docs/assets/screenshots/abertura.png) | ![Abertura de chamado - Dark](DevHelp/docs/assets/screenshots/abertura-dark.png) |
 | **Meus chamados** | ![Meus chamados - Light](DevHelp/docs/assets/screenshots/meus-chamados.png) | ![Meus chamados - Dark](DevHelp/docs/assets/screenshots/meus-chamados-dark.png) |
 | **Atendimento / Detalhes do ticket** | ![Atendimento - Light](DevHelp/docs/assets/screenshots/atendimento.png) | ![Atendimento - Dark](DevHelp/docs/assets/screenshots/atendimento-dark.png) |
 | **Painel TV** | ![Painel TV - Light](DevHelp/docs/assets/screenshots/painel-tv.png) | ![Painel TV - Dark](DevHelp/docs/assets/screenshots/painel-tv-dark.png) |
